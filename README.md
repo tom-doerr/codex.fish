@@ -43,6 +43,6 @@ You can install it using [fisher](https://github.com/jorgebucaran/fisher):
 ```
 fisher install tom-doerr/codex.fish
 ```
-
+---
 
 [ZSH version](https://github.com/tom-doerr/zsh_codex)
