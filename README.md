@@ -39,10 +39,27 @@ To use this plugin you need to get access to OpenAI's [Codex API](https://openai
 
 
 ## How do I install it?
+1. Install the OpenAI package.
+```
+pip3 install openai
+```
+
+2. Install the plugin itself.
 You can install it using [fisher](https://github.com/jorgebucaran/fisher):
 ```
 fisher install tom-doerr/codex.fish
 ```
+
+3. Create a file called `openaiapirc` in `~/.config` with your ORGANIZATION_ID and SECRET_KEY.
+
+```
+[openai]
+organization_id = ...
+secret_key = ...
+```
+
+4. Run `fish`, start typing and complete it using `^X`!
+
 ---
 
 [ZSH version](https://github.com/tom-doerr/zsh_codex)
