@@ -5,6 +5,5 @@ function create_completion
     set buffer (commandline -b)
     set cursor_pos (commandline -C)
     set completion (echo -n "$buffer" | $dir/create_completion.py $cursor_pos)
-    commandline -i $completion
+    commandline -r "$completion"
 end
-

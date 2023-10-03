@@ -5,9 +5,6 @@ import sys
 import os
 import configparser
 
-STREAM = False
-
-
 # Get config dir from environment or default to ~/.config
 CONFIG_DIR = os.getenv('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
 API_KEYS_LOCATION = os.path.join(CONFIG_DIR, 'openaiapirc')
@@ -17,6 +14,7 @@ API_KEYS_LOCATION = os.path.join(CONFIG_DIR, 'openaiapirc')
 # [openai]
 # organization_id=<your organization ID>
 # secret_key=<your secret key>
+# model=gpt-3.5-turbo
 
 # If you don't see your organization ID in the file you can get it from the
 # OpenAI web site: https://openai.com/organizations
@@ -30,6 +28,7 @@ def create_template_ini_file():
             f.write('[openai]\n')
             f.write('organization_id=\n')
             f.write('secret_key=\n')
+            f.write('model=gpt-3.5-turbo-0613\n')
 
         print('OpenAI API config file created at {}'.format(API_KEYS_LOCATION))
         print('Please edit it and add your organization ID and secret key')
@@ -50,37 +49,42 @@ def initialize_openai_api():
 
     openai.organization_id = config['openai']['organization_id'].strip('"').strip("'")
     openai.api_key = config['openai']['secret_key'].strip('"').strip("'")
+    model = config['openai']['model'].strip('"').strip("'")
+    return model
 
-
-initialize_openai_api()
+model = initialize_openai_api()
 
 cursor_position_char = int(sys.argv[1])
 
 # Read the input prompt from stdin.
 buffer = sys.stdin.read()
-prompt_prefix = '#!/bin/zsh\n\n' + buffer[:cursor_position_char]
+prompt_prefix = buffer[:cursor_position_char]
 prompt_suffix = buffer[cursor_position_char:]
+full_command = prompt_prefix + prompt_suffix
 
-response = openai.Completion.create(engine='code-davinci-002', prompt=prompt_prefix, suffix=prompt_suffix, temperature=0.5, max_tokens=50, stream=STREAM)
+response = openai.ChatCompletion.create(model=model, messages=[
+    {
+        "role":'system',
+        "content": """You are a fish shell expert, please help me complete the following command. You should only output the completed command; do not include any other explanation. Do not use Markdown backticks or any other formatting. Do not use shebangs. If the user provides a comment, respond with the command that addresses the comment.
 
-if STREAM:
-    while True:
-        next_response = next(response)
-        print("next_response:", next_response)
-        print("        next_response['choices'][0]['finish_reason']:",         next_response['choices'][0]['finish_reason'])
-        completion = next_response['choices'][0]['text']
-        print("completion:", completion)
-else:
-    completion_all = response['choices'][0]['text']
-    completion_list = completion_all.split('\n')
-    if completion_all[:2] == '\n\n':
-        print(completion_all)
-    elif completion_list[0]:
-        print(completion_list[0])
-    elif len(completion_list) == 1:
-        print('')
-    else:
-        print('\n' + completion_list[1])
+        Examples:
+        [User] git reset
+        [AI] git reset --hard HEAD
 
+        [User] git reset --soft
+        [AI] git reset --soft HEAD^
 
+        [User] # list files in current directory ordered by size and formatted as a table
+        [AI] ls -l | sort -n | awk '{print $5, $9}' | column -t
+        """,
+    },
+    {
+        "role":'user',
+        "content": full_command,
+    }
+])
 
+# fish doesn't support line breaks in its `commandline`
+completed_command = response['choices'][0]['message']['content'].rstrip()
+
+print(completed_command)
