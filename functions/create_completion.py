@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import openai
+from openai import OpenAI
 import sys
 import os
 import configparser
@@ -38,19 +38,21 @@ def create_template_ini_file():
                 'https://openai.com/blog/openai-codex/')
         sys.exit(1)
 
+API_KEY = None
 
 def initialize_openai_api():
     """
     Initialize the OpenAI API
     """
+    global API_KEY
+
     # Check if file at API_KEYS_LOCATION exists
     create_template_ini_file()
     config = configparser.ConfigParser()
     config.read(API_KEYS_LOCATION)
 
-    openai.organization_id = config['openai']['organization_id'].strip('"').strip("'")
-    openai.api_key = config['openai']['secret_key'].strip('"').strip("'")
-
+    # openai.organization_id = config['openai']['organization_id'].strip('"').strip("'")
+    API_KEY = config['openai']['secret_key'].strip('"').strip("'")
 
 initialize_openai_api()
 
@@ -58,10 +60,12 @@ cursor_position_char = int(sys.argv[1])
 
 # Read the input prompt from stdin.
 buffer = sys.stdin.read()
-prompt_prefix = '#!/bin/zsh\n\n' + buffer[:cursor_position_char]
+prompt_prefix = '#!/opt/homebrew/bin/fish\n\n' + buffer[:cursor_position_char]
 prompt_suffix = buffer[cursor_position_char:]
 
-response = openai.Completion.create(engine='code-davinci-002', prompt=prompt_prefix, suffix=prompt_suffix, temperature=0.5, max_tokens=50, stream=STREAM)
+# response = openai.completions.create(engine='code-davinci-002', prompt=prompt_prefix, suffix=prompt_suffix, temperature=0.5, max_tokens=50, stream=STREAM)
+client = OpenAI(api_key=API_KEY)
+response = client.completions.create(model='gpt-3.5-turbo-instruct', prompt=prompt_prefix, suffix=prompt_suffix, temperature=0.5, max_tokens=50, stream=STREAM)
 
 if STREAM:
     while True:
@@ -71,7 +75,7 @@ if STREAM:
         completion = next_response['choices'][0]['text']
         print("completion:", completion)
 else:
-    completion_all = response['choices'][0]['text']
+    completion_all = response.choices[0].text
     completion_list = completion_all.split('\n')
     if completion_all[:2] == '\n\n':
         print(completion_all)
