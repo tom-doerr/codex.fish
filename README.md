@@ -38,6 +38,10 @@ This is a fish plugin that enables you to use OpenAI's powerful Codex AI in the 
 To use this plugin you need to get access to OpenAI's [Codex API](https://openai.com/blog/openai-codex/).
 
 
+## Improved Version
+There's a fork of this repo called [fish-ai](https://github.com/Realiserad/fish-ai). It has many more features and supports more language models, so you should probably use [fish-ai](https://github.com/Realiserad/fish-ai) instead of the version in this repo.
+
+
 ## How do I install it?
 1. Install the OpenAI package.
 ```
@@ -61,8 +65,6 @@ secret_key = ...
 4. Run `fish`, start typing and complete it using `^X`!
 
 
-## Alternative
-[fish-ai](https://github.com/Realiserad/fish-ai)
 
 
 ---
