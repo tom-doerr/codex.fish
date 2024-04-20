@@ -60,6 +60,11 @@ secret_key = ...
 
 4. Run `fish`, start typing and complete it using `^X`!
 
+
+## Alternative
+[fish-ai](https://github.com/Realiserad/fish-ai)
+
+
 ---
 
 [ZSH version](https://github.com/tom-doerr/zsh_codex)
